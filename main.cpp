@@ -1,4 +1,4 @@
-﻿#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_MAIN
 
 #include <iostream>
 #include "LinkedList.h"
@@ -21,9 +21,10 @@ TEST_CASE("push") {
 	for (int i = 0; i < 5; i++) {
 		list2.push_front(i);
 	}
+	
 	for (LinkedList::iterator it = list2.begin(); it != list2.end(); it++) {
-		REQUIRE(*it == count);
 		count--;
+		REQUIRE(*it == count);
 	}
 	REQUIRE(list2.size() == 5);
 }
@@ -35,13 +36,13 @@ TEST_CASE("pop") {
 		list1.push_back(i);
 	}
 	list1.pop_back();
-	REQUIRE(*list1.end() == 3);
+	REQUIRE(*--list1.end() == 3);
 	//checking pop front
 	list1.pop_front();
 	REQUIRE(*list1.begin() == 1);
 }
 
-TEST_CASE("=, +=") {
+TEST_CASE("=, +=, +") {
 	//checking operator =
 	LinkedList list1;
 	list1.push_back(1);
@@ -51,6 +52,7 @@ TEST_CASE("=, +=") {
 	LinkedList::iterator it1 = list1.begin();
 	for (LinkedList::iterator it2 = list2.begin(); it2 != list2.end(); it2++) {
 		REQUIRE(*it2 == *it1);
+		it1++;
 	}
 	//checking LinkedList(const LinkedList& other)
 	LinkedList list3(list1);
@@ -64,6 +66,8 @@ TEST_CASE("=, +=") {
 		count++;
 	}
 	REQUIRE(list3.size() == 4);
+	LinkedList list4 = list1 + list2;
+	REQUIRE(list4 == list3);
 }
 
 TEST_CASE("insert") {
