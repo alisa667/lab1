@@ -2,48 +2,50 @@
 #include <stdexcept>
 
 LinkedList::LinkedList() {
-    head = nullptr;
+    tail = new Node;
+    tail->prev = tail;
+    tail->next = tail;
     num_of_elem = 0;
 }
 
 LinkedList::LinkedList(const LinkedList& other) {
-    head = new Node;
-    Node* temp = other.head;
-    push_back(temp->value);
-    while (temp != other.head->prev) {
-        temp = temp->next;
-        push_back(temp->value);
+    tail = new Node;
+    tail->prev = tail;
+    tail->next = tail;
+    num_of_elem = 0;
+    for (const_iterator it = other.begin(); it != other.end(); ++it) {
+        push_back(*it);
     }
-    num_of_elem = other.num_of_elem;
+    
 }
 
-LinkedList::LinkedList(LinkedList&& other) {
-    head = new Node;
-    *this = other;
+LinkedList::LinkedList(LinkedList&& other) { 
+    tail = other.tail;
     num_of_elem = other.num_of_elem;
-    other.clear();
-    
- 
+    other.tail = nullptr;
+    other.num_of_elem = 0;
 }
 
 LinkedList& LinkedList::operator=(const LinkedList& other){
-    clear();
-    head = new Node;
-    Node* temp = other.head;
-    push_back(temp->value);
-    while (temp != other.head->prev) {
-        temp = temp->next;
-        push_back(temp->value);
+    if (tail == other.tail) {
+        return *this;
     }
-    num_of_elem = other.num_of_elem;
+    clear();
+    for (LinkedList::const_iterator it = other.begin(); it != other.end(); ++it) {
+        push_back(*it);
+    }
     return *this;
 }
 
 LinkedList& LinkedList::operator=(LinkedList&& other) {
+    if (*this == other) {
+        return *this;
+    }
     clear();
-    *this = other;
+    tail = other.tail;
     num_of_elem = other.num_of_elem;
-    other.clear();
+    other.tail = nullptr;
+    other.num_of_elem = 0;
     return *this;
 }
 
@@ -51,12 +53,8 @@ void LinkedList::pop_front() {
     if (empty()) {
         throw std::logic_error("The list is empty!");
     }
-    Node* temp = head;
-    head->prev->next = head->next;
-    head->next->prev = head->prev;//
-    head = head->next;
-    delete temp;
-    num_of_elem--;
+    iterator it = begin();
+    erase(it);
 }
 
 
@@ -64,50 +62,23 @@ void LinkedList::pop_back() {
     if (empty()) {
         throw std::logic_error("The list is empty!");
     }
-    Node* temp = head->prev;
-    head->prev = head->prev->prev;
-    head->prev->next = head;
-    delete temp;
-    num_of_elem--;
+    iterator it = --end();
+    erase(it);
 }
 
 void LinkedList::push_back(const value_type& value) {
-    Node* temp = new Node;
-    temp->value = value;
-    if (!this->empty()) {
-        head->prev->next = temp;
-        temp->prev = head->prev;
-        head->prev = temp;
-        temp->next = head;
-    }
-    else {
-        head = temp;
-        head->prev = head;
-        head->next = head;
-    }
-    num_of_elem++;
+    iterator it = end();
+    insert(it, value);
 }
 
 void LinkedList::push_front(const value_type& value) {
-    Node* temp = new Node;
-    temp->value = value;
-    if (!this->empty()) {
-        head->prev->next = temp;
-        temp->prev = head->prev;
-        head->prev = temp;
-        temp->next = head;
-        head = temp;
-    }
-    else {
-        head = temp;
-        head->prev = head;
-        head->next = head;
-    }
-    num_of_elem ++;
+    iterator it = begin();
+    insert(it, value);
 }
 
 LinkedList::~LinkedList() {
     clear();
+    delete tail;
 }
 
 
@@ -124,18 +95,18 @@ bool LinkedList::empty() const {
 
 void LinkedList::clear() {
     while (!empty()) 
-        pop_back();
+        pop_front();
     
 }
 
 bool operator==(const LinkedList& left, const LinkedList& right) {
     if (left.num_of_elem != right.num_of_elem)
         return false;
-    auto temp1 = left.head->next;
-    auto temp2 = right.head->next;
+    auto temp1 = left.tail->next;
+    auto temp2 = right.tail->next;
     if (temp1->value != temp2->value)
         return false;
-    while (temp1 != left.head) {
+    while (temp1 != left.tail) {
         if (temp1->value != temp2->value)
             return false;
         temp1 = temp1->next;
@@ -167,25 +138,27 @@ value_type& LinkedList::back() {
     if (empty()) {
         throw std::logic_error("The list is empty!");
     }
-    return *end();
+    return *--end();
 }
 
 const value_type& LinkedList::back() const {
     if (empty()) {
         throw std::logic_error("The list is empty!");
     }
-    return *cend();
+    return *--cend();
 }
 int LinkedList::remove(const value_type& value) {
     int i = 0;
-    for (iterator it = begin(); it != end(); ++it) {
+    iterator it = begin();
+    while (it != end()) {
         if (*it == value) {
             it = erase(it);
             i++;
         }
+        else {
+            it++;
+        }
     }
-    if (*end() == value)
-        i++;
     return i;
 }
 
@@ -193,12 +166,11 @@ LinkedList& LinkedList::operator+=(const LinkedList& other) {
     for (const_iterator it = other.begin(); it != other.end(); ++it) {
         push_back(*it);
     }
-   push_back(*other.end());
     return *this;
 }
 
 LinkedList operator+(const LinkedList& left, const LinkedList& right) {
-    LinkedList* newList = new LinkedList;
-    *newList += right;
-    return *newList;
+    LinkedList* sum = new LinkedList(left);
+    *sum += right;
+    return *sum;
 }
