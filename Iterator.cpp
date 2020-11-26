@@ -50,13 +50,13 @@ LinkedList::iterator LinkedList::iterator::operator--(int) {
 
 LinkedList::iterator LinkedList::begin(){
 	LinkedList::iterator it;
-	it.elem = head;
+	it.elem = tail->next;
 	return it;
 }
 
 LinkedList::iterator LinkedList::end() {
 	LinkedList::iterator it;
-	it.elem = head->prev;
+	it.elem = tail;
 	return it;
 }
 
