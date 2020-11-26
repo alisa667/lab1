@@ -49,24 +49,24 @@ LinkedList::const_iterator LinkedList::const_iterator::operator--(int) {
 
 LinkedList::const_iterator LinkedList::begin() const{
 	LinkedList::const_iterator it;
-	it.elem_const = head;
+	it.elem_const = tail->next;
 	return it;
 }
 
 LinkedList::const_iterator LinkedList::end() const{
 	LinkedList::const_iterator it;
-	it.elem_const = head->prev;
+	it.elem_const = tail;
 	return it;
 }
 
 LinkedList::const_iterator LinkedList::cbegin() const {
 	LinkedList::const_iterator it;
-	it.elem_const = head->prev;
+	it.elem_const = tail->next;
 	return it;
 }
 
 LinkedList::const_iterator LinkedList::cend() const {
 	LinkedList::const_iterator it;
-	it.elem_const = head->prev;
+	it.elem_const = tail;
 	return it;
 }
